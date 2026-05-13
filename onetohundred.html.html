@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1 to 100 Number Counting</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@400;600;700;800&family=Fredoka+One&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue: #3b82f6;
+    --yellow: #fbbf24;
+    --orange: #f97316;
+    --green: #22c55e;
+    --purple: #a855f7;
+    --cyan: #06b6d4;
+    --pink: #ec4899;
+    --bg: #0a0a1a;
+    --glass: rgba(255,255,255,0.06);
+    --glass-border: rgba(255,255,255,0.12);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: #fff;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Animated BG */
+  .bg-orbs {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  }
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.18;
+    animation: orbFloat 12s ease-in-out infinite;
+  }
+  .orb1 { width: 500px; height: 500px; background: var(--blue); top: -100px; left: -100px; animation-delay: 0s; }
+  .orb2 { width: 400px; height: 400px; background: var(--purple); bottom: -100px; right: -100px; animation-delay: 4s; }
+  .orb3 { width: 300px; height: 300px; background: var(--cyan); top: 50%; left: 50%; animation-delay: 8s; }
+  @keyframes orbFloat {
+    0%,100% { transform: translate(0,0) scale(1); }
+    50% { transform: translate(30px, -40px) scale(1.1); }
+  }
+
+  /* Particles */
+  .particles-container { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+  .particle {
+    position: absolute;
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    animation: particleDrift linear infinite;
+    opacity: 0;
+  }
+  @keyframes particleDrift {
+    0% { transform: translateY(100vh) translateX(0); opacity: 0; }
+    10% { opacity: 0.6; }
+    90% { opacity: 0.4; }
+    100% { transform: translateY(-20px) translateX(var(--drift, 30px)); opacity: 0; }
+  }
+
+  /* Header */
+  header {
+    text-align: center;
+    padding: 28px 20px 18px;
+    position: relative; z-index: 10;
+    background: linear-gradient(180deg, rgba(10,10,26,0.95) 0%, transparent 100%);
+  }
+  .main-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(2rem, 5vw, 3.8rem);
+    background: linear-gradient(135deg, #60a5fa, #a78bfa, #f472b6, #fb923c, #facc15);
+    background-size: 300%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: titleShine 4s linear infinite;
+    text-shadow: none;
+    filter: drop-shadow(0 0 30px rgba(139,92,246,0.5));
+    letter-spacing: 1px;
+  }
+  @keyframes titleShine {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  .subtitle {
+    font-family: 'Baloo 2', cursive;
+    font-size: clamp(0.85rem, 2vw, 1.1rem);
+    color: rgba(255,255,255,0.65);
+    margin-top: 6px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    animation: subtitleGlow 3s ease-in-out infinite alternate;
+  }
+  @keyframes subtitleGlow {
+    from { color: rgba(255,255,255,0.5); text-shadow: 0 0 10px rgba(99,102,241,0); }
+    to { color: rgba(200,180,255,0.9); text-shadow: 0 0 20px rgba(139,92,246,0.6); }
+  }
+
+  /* Layout */
+  .app-layout {
+    display: grid;
+    grid-template-columns: 1fr 260px;
+    gap: 16px;
+    padding: 12px 20px 20px;
+    position: relative; z-index: 5;
+    max-width: 1400px;
+    margin: 0 auto;
+    height: calc(100vh - 130px);
+  }
+
+  /* LEFT PANEL */
+  .left-panel {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 28px;
+    backdrop-filter: blur(20px);
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    min-height: 500px;
+  }
+  .left-panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(99,102,241,0.05), rgba(236,72,153,0.05));
+    border-radius: 28px;
+  }
+
+  /* Default state */
+  .default-state {
+    text-align: center;
+    animation: fadeIn 0.5s ease;
+  }
+  .default-icon {
+    font-size: 6rem;
+    animation: bounce 2s ease-in-out infinite;
+    display: block;
+    margin-bottom: 20px;
+  }
+  @keyframes bounce {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+  }
+  .default-hint {
+    font-family: 'Baloo 2', cursive;
+    font-size: 1.4rem;
+    color: rgba(255,255,255,0.5);
+    font-weight: 600;
+  }
+
+  /* Active learning state */
+  .learning-state { display: none; width: 100%; }
+  .learning-state.active { display: flex; flex-direction: column; align-items: center; }
+
+  /* Big number display */
+  .big-number {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(5rem, 15vw, 10rem);
+    line-height: 1;
+    background: linear-gradient(135deg, var(--current-color1, #60a5fa), var(--current-color2, #a78bfa));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 40px var(--current-glow, rgba(99,102,241,0.7)));
+    animation: numberPop 0.5s cubic-bezier(0.34,1.56,0.64,1);
+    margin-bottom: 4px;
+  }
+  @keyframes numberPop {
+    0% { transform: scale(0.3) rotate(-10deg); opacity: 0; }
+    100% { transform: scale(1) rotate(0); opacity: 1; }
+  }
+
+  .number-word {
+    font-family: 'Baloo 2', cursive;
+    font-size: clamp(1.5rem, 4vw, 2.8rem);
+    font-weight: 800;
+    color: var(--current-word-color, #a78bfa);
+    text-shadow: 0 0 30px var(--current-glow, rgba(167,139,250,0.8));
+    animation: wordSlideIn 0.4s ease 0.1s both;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+  }
+  @keyframes wordSlideIn {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  /* Speaker */
+  .speaker-btn {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 50%;
+    width: 54px; height: 54px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 1.5rem;
+    transition: all 0.3s;
+    margin-bottom: 20px;
+    position: relative;
+  }
+  .speaker-btn.playing {
+    animation: speakerPulse 0.8s ease-in-out infinite;
+    background: rgba(99,102,241,0.2);
+    border-color: var(--purple);
+    box-shadow: 0 0 0 0 rgba(99,102,241,0.5);
+  }
+  @keyframes speakerPulse {
+    0% { box-shadow: 0 0 0 0 rgba(99,102,241,0.6); }
+    70% { box-shadow: 0 0 0 18px rgba(99,102,241,0); }
+    100% { box-shadow: 0 0 0 0 rgba(99,102,241,0); }
+  }
+
+  /* Object grid */
+  .objects-grid {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+    overflow: hidden;
+    padding: 10px;
+    max-height: 280px;
+  }
+  .obj-item {
+    animation: objAppear 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    transition: transform 0.2s;
+  }
+  .obj-item:hover { transform: scale(1.2) rotate(5deg); }
+  @keyframes objAppear {
+    from { transform: scale(0) rotate(-20deg); opacity: 0; }
+    to { transform: scale(1) rotate(0); opacity: 1; }
+  }
+
+  /* Controls */
+  .controls-bar {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .ctrl-btn {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.9rem;
+    padding: 10px 22px;
+    border-radius: 50px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+    letter-spacing: 0.5px;
+    display: flex; align-items: center; gap: 6px;
+    position: relative;
+    overflow: hidden;
+  }
+  .ctrl-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.1);
+    transform: translateX(-100%);
+    transition: transform 0.3s;
+  }
+  .ctrl-btn:hover::before { transform: translateX(0); }
+  .ctrl-btn:hover { transform: scale(1.08) translateY(-2px); box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+  .ctrl-btn:active { transform: scale(0.96); }
+
+  .btn-prev { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; }
+  .btn-next { background: linear-gradient(135deg, #f97316, #fbbf24); color: #fff; }
+  .btn-reset { background: linear-gradient(135deg, #ef4444, #f97316); color: #fff; }
+  .btn-auto { background: linear-gradient(135deg, #22c55e, #06b6d4); color: #fff; }
+  .btn-sound { background: linear-gradient(135deg, #a855f7, #ec4899); color: #fff; }
+  .btn-fs { background: linear-gradient(135deg, #0ea5e9, #6366f1); color: #fff; }
+
+  /* Progress bar */
+  .progress-wrap {
+    width: 100%;
+    margin-top: 16px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 20px;
+    height: 10px;
+    overflow: hidden;
+  }
+  .progress-bar {
+    height: 100%;
+    border-radius: 20px;
+    background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899, #f97316);
+    background-size: 200%;
+    animation: progressShine 2s linear infinite;
+    transition: width 0.5s cubic-bezier(0.34,1.56,0.64,1);
+    width: 0%;
+  }
+  @keyframes progressShine {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+  }
+  .progress-label {
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.5);
+    text-align: right;
+    margin-top: 4px;
+    font-weight: 700;
+  }
+
+  /* RIGHT PANEL */
+  .right-panel {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 28px;
+    backdrop-filter: blur(20px);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .right-panel-header {
+    padding: 14px 16px 10px;
+    text-align: center;
+    font-family: 'Baloo 2', cursive;
+    font-weight: 800;
+    font-size: 1rem;
+    color: rgba(255,255,255,0.7);
+    border-bottom: 1px solid var(--glass-border);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .numbers-list {
+    overflow-y: auto;
+    flex: 1;
+    padding: 10px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(139,92,246,0.4) transparent;
+  }
+  .numbers-list::-webkit-scrollbar { width: 4px; }
+  .numbers-list::-webkit-scrollbar-thumb { background: rgba(139,92,246,0.4); border-radius: 4px; }
+
+  .num-card {
+    background: rgba(255,255,255,0.07);
+    border: 1.5px solid rgba(255,255,255,0.18);
+    border-radius: 14px;
+    padding: 14px 6px;
+    min-height: 54px;
+    text-align: center;
+    cursor: pointer;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.35rem;
+    line-height: 1;
+    color: #fff;
+    transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+    position: relative;
+    overflow: visible;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .num-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent, rgba(255,255,255,0.05));
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .num-card:hover {
+    transform: scale(1.1) translateY(-2px);
+    background: rgba(255,255,255,0.12);
+    border-color: rgba(255,255,255,0.25);
+    color: #fff;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3), 0 0 20px var(--card-glow, rgba(99,102,241,0.3));
+  }
+  .num-card:hover::after { opacity: 1; }
+  .num-card.active {
+    transform: scale(1.12);
+    border-color: var(--card-active-color, #a78bfa);
+    box-shadow: 0 0 0 2px var(--card-active-color, #a78bfa), 0 0 25px var(--card-active-glow, rgba(167,139,250,0.5));
+    color: #fff;
+    background: rgba(167,139,250,0.15);
+    animation: activeCardPulse 2s ease-in-out infinite;
+  }
+  @keyframes activeCardPulse {
+    0%,100% { box-shadow: 0 0 0 2px var(--card-active-color, #a78bfa), 0 0 25px var(--card-active-glow, rgba(167,139,250,0.5)); }
+    50% { box-shadow: 0 0 0 2px var(--card-active-color, #a78bfa), 0 0 45px var(--card-active-glow, rgba(167,139,250,0.7)); }
+  }
+
+  /* Auto play indicator */
+  .auto-indicator {
+    position: absolute;
+    top: 12px; left: 12px;
+    background: linear-gradient(135deg, #22c55e, #06b6d4);
+    border-radius: 50px;
+    padding: 4px 12px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    display: none;
+    animation: autoFlash 1s ease-in-out infinite alternate;
+  }
+  .auto-indicator.active { display: block; }
+  @keyframes autoFlash {
+    from { opacity: 0.7; }
+    to { opacity: 1; box-shadow: 0 0 15px rgba(34,197,94,0.7); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .app-layout {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto 200px;
+      height: auto;
+    }
+    .right-panel { max-height: 220px; }
+    .numbers-list { grid-template-columns: repeat(5, 1fr); }
+    .num-card { font-size: 0.9rem; padding: 6px 2px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- BG Effects -->
+<div class="bg-orbs">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+</div>
+<div class="particles-container" id="particles"></div>
+
+<!-- Header -->
+<header>
+  <div class="main-title">1 to 100 Number Counting</div>
+  <div class="subtitle">✦ Designed By: Bikash Bhusal ✦</div>
+</header>
+
+<!-- Main Layout -->
+<div class="app-layout">
+
+  <!-- LEFT PANEL -->
+  <div class="left-panel" id="leftPanel">
+    <div class="auto-indicator" id="autoIndicator">▶ AUTO PLAY</div>
+
+    <!-- Default State -->
+    <div class="default-state" id="defaultState">
+      <span class="default-icon">🔢</span>
+      <div class="default-hint">Tap a number to begin!</div>
+    </div>
+
+    <!-- Learning State -->
+    <div class="learning-state" id="learningState">
+      <div class="big-number" id="bigNumber">1</div>
+      <div class="number-word" id="numberWord">One</div>
+      <button class="speaker-btn" id="speakerBtn" onclick="playCurrentAudio()">🔊</button>
+      <div class="objects-grid" id="objectsGrid"></div>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls-bar">
+      <button class="ctrl-btn btn-prev" onclick="goTo(currentNum - 1)">◀ Prev</button>
+      <button class="ctrl-btn btn-next" onclick="goTo(currentNum + 1)">Next ▶</button>
+      <button class="ctrl-btn btn-auto" id="autoBtn" onclick="toggleAuto()">▶ Auto</button>
+      <button class="ctrl-btn btn-sound" id="soundBtn" onclick="toggleSound()">🔊 Sound</button>
+      <button class="ctrl-btn btn-reset" onclick="resetAll()">↺ Reset</button>
+      <button class="ctrl-btn btn-fs" onclick="toggleFullscreen()">⛶ Full</button>
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-wrap" style="width:100%">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div class="progress-label" id="progressLabel">0 / 100</div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <div class="right-panel-header">📚 Numbers 1–100</div>
+    <div class="numbers-list" id="numbersList"></div>
+  </div>
+
+</div>
+
+<script>
+// ────────── DATA ──────────
+const WORDS = [
+  '', 'One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten',
+  'Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen','Twenty',
+  'Twenty One','Twenty Two','Twenty Three','Twenty Four','Twenty Five','Twenty Six','Twenty Seven','Twenty Eight','Twenty Nine','Thirty',
+  'Thirty One','Thirty Two','Thirty Three','Thirty Four','Thirty Five','Thirty Six','Thirty Seven','Thirty Eight','Thirty Nine','Forty',
+  'Forty One','Forty Two','Forty Three','Forty Four','Forty Five','Forty Six','Forty Seven','Forty Eight','Forty Nine','Fifty',
+  'Fifty One','Fifty Two','Fifty Three','Fifty Four','Fifty Five','Fifty Six','Fifty Seven','Fifty Eight','Fifty Nine','Sixty',
+  'Sixty One','Sixty Two','Sixty Three','Sixty Four','Sixty Five','Sixty Six','Sixty Seven','Sixty Eight','Sixty Nine','Seventy',
+  'Seventy One','Seventy Two','Seventy Three','Seventy Four','Seventy Five','Seventy Six','Seventy Seven','Seventy Eight','Seventy Nine','Eighty',
+  'Eighty One','Eighty Two','Eighty Three','Eighty Four','Eighty Five','Eighty Six','Eighty Seven','Eighty Eight','Eighty Nine','Ninety',
+  'Ninety One','Ninety Two','Ninety Three','Ninety Four','Ninety Five','Ninety Six','Ninety Seven','Ninety Eight','Ninety Nine','One Hundred'
+];
+
+// Color themes cycling through numbers
+const THEMES = [
+  { c1:'#60a5fa', c2:'#818cf8', glow:'rgba(96,165,250,0.7)', word:'#93c5fd', active:'#60a5fa', activeGlow:'rgba(96,165,250,0.5)', card:'rgba(96,165,250,0.3)' },
+  { c1:'#34d399', c2:'#06b6d4', glow:'rgba(52,211,153,0.7)', word:'#6ee7b7', active:'#34d399', activeGlow:'rgba(52,211,153,0.5)', card:'rgba(52,211,153,0.3)' },
+  { c1:'#f97316', c2:'#fbbf24', glow:'rgba(249,115,22,0.7)', word:'#fdba74', active:'#f97316', activeGlow:'rgba(249,115,22,0.5)', card:'rgba(249,115,22,0.3)' },
+  { c1:'#a855f7', c2:'#ec4899', glow:'rgba(168,85,247,0.7)', word:'#c084fc', active:'#a855f7', activeGlow:'rgba(168,85,247,0.5)', card:'rgba(168,85,247,0.3)' },
+  { c1:'#f472b6', c2:'#fb923c', glow:'rgba(244,114,182,0.7)', word:'#f9a8d4', active:'#f472b6', activeGlow:'rgba(244,114,182,0.5)', card:'rgba(244,114,182,0.3)' },
+  { c1:'#38bdf8', c2:'#818cf8', glow:'rgba(56,189,248,0.7)', word:'#7dd3fc', active:'#38bdf8', activeGlow:'rgba(56,189,248,0.5)', card:'rgba(56,189,248,0.3)' },
+  { c1:'#4ade80', c2:'#34d399', glow:'rgba(74,222,128,0.7)', word:'#86efac', active:'#4ade80', activeGlow:'rgba(74,222,128,0.5)', card:'rgba(74,222,128,0.3)' },
+  { c1:'#fb923c', c2:'#fbbf24', glow:'rgba(251,146,60,0.7)', word:'#fdba74', active:'#fb923c', activeGlow:'rgba(251,146,60,0.5)', card:'rgba(251,146,60,0.3)' },
+  { c1:'#c084fc', c2:'#818cf8', glow:'rgba(192,132,252,0.7)', word:'#d8b4fe', active:'#c084fc', activeGlow:'rgba(192,132,252,0.5)', card:'rgba(192,132,252,0.3)' },
+  { c1:'#22d3ee', c2:'#4ade80', glow:'rgba(34,211,238,0.7)', word:'#67e8f9', active:'#22d3ee', activeGlow:'rgba(34,211,238,0.5)', card:'rgba(34,211,238,0.3)' },
+];
+
+// SVG real-object drawings — pencil, ball, apple, dog, star, book, fish, car, flower, butterfly
+const SVG_OBJECTS = {
+  pencil: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><rect x="17" y="5" width="6" height="24" rx="1" fill="#FBBF24"/><polygon points="17,29 23,29 20,36" fill="#F87171"/><rect x="17" y="5" width="6" height="5" rx="1" fill="#9CA3AF"/><rect x="18" y="5" width="4" height="4" fill="#D1D5DB"/><line x1="20" y1="5" y2="29" x2="20" stroke="#E5A800" stroke-width="0.7"/></svg>`,
+  ball: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="15" fill="#EF4444"/><path d="M8,14 Q20,10 32,14" stroke="#fff" stroke-width="2" fill="none"/><path d="M6,22 Q20,30 34,22" stroke="#fff" stroke-width="2" fill="none"/><path d="M14,6 Q16,20 14,34" stroke="#fff" stroke-width="2" fill="none"/><path d="M26,6 Q24,20 26,34" stroke="#fff" stroke-width="2" fill="none"/><circle cx="20" cy="20" r="15" fill="none" stroke="#C91C1C" stroke-width="1"/></svg>`,
+  apple: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M20,8 Q28,5 30,14 Q34,22 28,30 Q24,36 20,36 Q16,36 12,30 Q6,22 10,14 Q12,5 20,8Z" fill="#EF4444"/><path d="M20,8 Q14,5 12,14" fill="none" stroke="#B91C1C" stroke-width="1"/><rect x="19" y="3" width="3" height="7" rx="1" fill="#6B7280"/><path d="M22,5 Q28,2 30,7" fill="none" stroke="#6B7280" stroke-width="1.5"/><ellipse cx="15" cy="18" rx="3" ry="5" fill="rgba(255,255,255,0.25)"/></svg>`,
+  dog: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><ellipse cx="20" cy="26" rx="13" ry="10" fill="#D97706"/><circle cx="20" cy="14" r="9" fill="#D97706"/><ellipse cx="13" cy="10" rx="4" ry="6" fill="#B45309" transform="rotate(-20,13,10)"/><ellipse cx="27" cy="10" rx="4" ry="6" fill="#B45309" transform="rotate(20,27,10)"/><circle cx="16" cy="13" r="2" fill="#1F2937"/><circle cx="24" cy="13" r="2" fill="#1F2937"/><circle cx="16.5" cy="12.5" r="0.7" fill="#fff"/><circle cx="24.5" cy="12.5" r="0.7" fill="#fff"/><ellipse cx="20" cy="18" rx="3" ry="2" fill="#F59E0B"/><path d="M17,19 Q20,22 23,19" fill="none" stroke="#B45309" stroke-width="1.2"/><ellipse cx="7" cy="33" rx="3" ry="2" fill="#B45309" transform="rotate(-30,7,33)"/><ellipse cx="33" cy="33" rx="3" ry="2" fill="#B45309" transform="rotate(30,33,33)"/></svg>`,
+  star: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><polygon points="20,3 24.7,14.5 37,14.5 27,22 30.7,34 20,27 9.3,34 13,22 3,14.5 15.3,14.5" fill="#FBBF24" stroke="#F59E0B" stroke-width="1"/><polygon points="20,8 23,16 31,16 25,21 27,29 20,24 13,29 15,21 9,16 17,16" fill="#FDE68A"/></svg>`,
+  book: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="6" width="24" height="30" rx="3" fill="#3B82F6"/><rect x="8" y="6" width="4" height="30" fill="#1D4ED8"/><rect x="14" y="12" width="14" height="2" rx="1" fill="rgba(255,255,255,0.7)"/><rect x="14" y="17" width="14" height="2" rx="1" fill="rgba(255,255,255,0.7)"/><rect x="14" y="22" width="10" height="2" rx="1" fill="rgba(255,255,255,0.7)"/></svg>`,
+  fish: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><ellipse cx="19" cy="20" rx="13" ry="8" fill="#06B6D4"/><polygon points="32,12 40,20 32,28" fill="#0891B2"/><circle cx="11" cy="17" r="2" fill="#fff"/><circle cx="11" cy="17" r="1" fill="#1F2937"/><path d="M19,16 Q25,20 19,24" fill="none" stroke="#0891B2" stroke-width="1"/></svg>`,
+  car: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="22" width="32" height="12" rx="3" fill="#10B981"/><path d="M8,22 L12,13 Q14,10 18,10 L26,10 Q30,10 32,13 L36,22Z" fill="#059669"/><rect x="13" y="13" width="7" height="7" rx="1" fill="#BAE6FD"/><rect x="22" y="13" width="7" height="7" rx="1" fill="#BAE6FD"/><circle cx="11" cy="34" r="4" fill="#374151"/><circle cx="11" cy="34" r="2" fill="#9CA3AF"/><circle cx="29" cy="34" r="4" fill="#374151"/><circle cx="29" cy="34" r="2" fill="#9CA3AF"/></svg>`,
+  flower: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><line x1="20" y1="40" x2="20" y2="20" stroke="#22C55E" stroke-width="2.5"/><ellipse cx="14" cy="30" rx="5" ry="3" fill="#16A34A" transform="rotate(-30,14,30)"/><circle cx="20" cy="16" r="5" fill="#FBBF24"/><ellipse cx="20" cy="8" rx="4" ry="6" fill="#F472B6"/><ellipse cx="20" cy="24" rx="4" ry="6" fill="#F472B6"/><ellipse cx="12" cy="16" rx="6" ry="4" fill="#EC4899"/><ellipse cx="28" cy="16" rx="6" ry="4" fill="#EC4899"/><ellipse cx="14" cy="10" rx="4" ry="6" fill="#F9A8D4" transform="rotate(-45,14,10)"/><ellipse cx="26" cy="10" rx="4" ry="6" fill="#F9A8D4" transform="rotate(45,26,10)"/><ellipse cx="14" cy="22" rx="4" ry="6" fill="#F9A8D4" transform="rotate(45,14,22)"/><ellipse cx="26" cy="22" rx="4" ry="6" fill="#F9A8D4" transform="rotate(-45,26,22)"/><circle cx="20" cy="16" r="4" fill="#FDE68A"/></svg>`,
+  butterfly: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><ellipse cx="12" cy="16" rx="9" ry="7" fill="#A855F7" transform="rotate(-20,12,16)"/><ellipse cx="28" cy="16" rx="9" ry="7" fill="#A855F7" transform="rotate(20,28,16)"/><ellipse cx="12" cy="26" rx="7" ry="5" fill="#7C3AED" transform="rotate(20,12,26)"/><ellipse cx="28" cy="26" rx="7" ry="5" fill="#7C3AED" transform="rotate(-20,28,26)"/><ellipse cx="12" cy="16" rx="5" ry="4" fill="#C084FC" transform="rotate(-20,12,16)"/><ellipse cx="28" cy="16" rx="5" ry="4" fill="#C084FC" transform="rotate(20,28,16)"/><path d="M20,8 Q20,20 20,34" stroke="#1F2937" stroke-width="2" fill="none"/><path d="M18,9 Q14,6 13,8" stroke="#1F2937" stroke-width="1.5" fill="none"/><path d="M22,9 Q26,6 27,8" stroke="#1F2937" stroke-width="1.5" fill="none"/></svg>`,
+};
+
+// Map each number to a specific object type
+const NUM_TO_OBJ = [
+  '','ball','pencil','apple','star','dog',
+  'book','fish','car','flower','butterfly',
+  'ball','pencil','apple','star','dog',
+  'book','fish','car','flower','butterfly',
+  'ball','pencil','apple','star','dog',
+  'book','fish','car','flower','butterfly',
+  'ball','pencil','apple','star','dog',
+  'book','fish','car','flower','butterfly',
+  'ball','pencil','apple','star','dog',
+  'book','fish','car','flower','butterfly',
+  'ball','pencil','apple','star','dog',
+  'book','fish','car','flower','butterfly',
+  'ball','pencil','apple','star','dog',
+  'book','fish','car','flower','butterfly',
+  'ball','pencil','apple','star','dog',
+  'book','fish','car','flower','butterfly',
+  'ball','pencil','apple','star','dog',
+  'book','fish','car','flower','butterfly',
+  'ball','pencil','apple','star','dog',
+  'book','fish','car','flower','butterfly',
+];
+
+let currentNum = 0;
+let soundOn = true;
+let autoPlaying = false;
+let autoTimer = null;
+let speechSynth = window.speechSynthesis;
+let currentUtter = null;
+let voices = [];
+
+// Load voices
+function loadVoices() {
+  voices = speechSynth.getVoices();
+}
+loadVoices();
+if (speechSynth.onvoiceschanged !== undefined) {
+  speechSynth.onvoiceschanged = loadVoices;
+}
+
+// ────────── INIT ──────────
+function init() {
+  buildNumberList();
+  buildParticles();
+}
+
+function buildNumberList() {
+  const list = document.getElementById('numbersList');
+  for (let i = 1; i <= 100; i++) {
+    const theme = THEMES[(i - 1) % THEMES.length];
+    const card = document.createElement('div');
+    card.className = 'num-card';
+    card.id = `card-${i}`;
+    card.textContent = i;
+    card.style.setProperty('--card-glow', theme.card);
+    card.onclick = () => goTo(i);
+    list.appendChild(card);
+  }
+}
+
+function buildParticles() {
+  const container = document.getElementById('particles');
+  const colors = ['#60a5fa','#a78bfa','#f472b6','#34d399','#fbbf24','#38bdf8'];
+  for (let i = 0; i < 40; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.cssText = `
+      left: ${Math.random() * 100}%;
+      width: ${2 + Math.random() * 4}px;
+      height: ${2 + Math.random() * 4}px;
+      background: ${colors[Math.floor(Math.random() * colors.length)]};
+      animation-duration: ${8 + Math.random() * 15}s;
+      animation-delay: ${Math.random() * 15}s;
+      --drift: ${(Math.random() - 0.5) * 100}px;
+      border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
+    `;
+    container.appendChild(p);
+  }
+}
+
+// ────────── NAVIGATION ──────────
+function goTo(n) {
+  if (n < 1 || n > 100) return;
+  currentNum = n;
+  showNumber(n);
+  scrollToCard(n);
+  updateProgress(n);
+}
+
+function showNumber(n) {
+  const theme = THEMES[(n - 1) % THEMES.length];
+  const word = WORDS[n];
+
+  // Show learning state
+  document.getElementById('defaultState').style.display = 'none';
+  const ls = document.getElementById('learningState');
+  ls.style.display = 'flex';
+  ls.classList.remove('active');
+  void ls.offsetWidth;
+  ls.classList.add('active');
+
+  // Update big number
+  const bn = document.getElementById('bigNumber');
+  bn.textContent = n;
+  bn.style.setProperty('--current-color1', theme.c1);
+  bn.style.setProperty('--current-color2', theme.c2);
+  bn.style.background = `linear-gradient(135deg, ${theme.c1}, ${theme.c2})`;
+  bn.style.webkitBackgroundClip = 'text';
+  bn.style.backgroundClip = 'text';
+  bn.style.webkitTextFillColor = 'transparent';
+  bn.style.filter = `drop-shadow(0 0 40px ${theme.glow})`;
+  // Re-trigger animation
+  bn.style.animation = 'none'; void bn.offsetWidth;
+  bn.style.animation = 'numberPop 0.5s cubic-bezier(0.34,1.56,0.64,1)';
+
+  // Word
+  const nw = document.getElementById('numberWord');
+  nw.textContent = word;
+  nw.style.color = theme.word;
+  nw.style.textShadow = `0 0 30px ${theme.glow}`;
+  nw.style.animation = 'none'; void nw.offsetWidth;
+  nw.style.animation = 'wordSlideIn 0.4s ease 0.1s both';
+
+  // Objects
+  renderObjects(n, theme);
+
+  // Update active card
+  document.querySelectorAll('.num-card').forEach(c => {
+    c.classList.remove('active');
+    c.style.removeProperty('--card-active-color');
+    c.style.removeProperty('--card-active-glow');
+  });
+  const activeCard = document.getElementById(`card-${n}`);
+  if (activeCard) {
+    activeCard.classList.add('active');
+    activeCard.style.setProperty('--card-active-color', theme.active);
+    activeCard.style.setProperty('--card-active-glow', theme.activeGlow);
+  }
+
+  // Audio
+  if (soundOn) playAudio(word);
+}
+
+// ────────── OBJECTS ──────────
+function renderObjects(n, theme) {
+  const grid = document.getElementById('objectsGrid');
+  grid.innerHTML = '';
+
+  const objKey = NUM_TO_OBJ[n] || 'ball';
+  const svgStr = SVG_OBJECTS[objKey];
+
+  if (n <= 50) {
+    // Normal grid layout: show all n objects
+    grid.style.cssText = `
+      display:flex; flex-wrap:wrap; gap:6px;
+      justify-content:center; align-items:center;
+      width:100%; flex:1; overflow:hidden; padding:8px; max-height:280px;
+    `;
+
+    let size;
+    if (n <= 3) size = 52;
+    else if (n <= 6) size = 44;
+    else if (n <= 10) size = 38;
+    else if (n <= 15) size = 32;
+    else if (n <= 20) size = 28;
+    else if (n <= 30) size = 24;
+    else if (n <= 40) size = 20;
+    else size = 17;
+
+    for (let i = 0; i < n; i++) {
+      const item = document.createElement('div');
+      item.className = 'obj-item';
+      item.style.cssText = `
+        width:${size + 6}px; height:${size + 6}px;
+        animation-delay:${i * 0.025}s;
+        background:rgba(255,255,255,0.05);
+        border:1px solid rgba(255,255,255,0.1);
+        border-radius:10px; padding:2px;
+      `;
+      item.innerHTML = svgStr;
+      grid.appendChild(item);
+    }
+
+  } else {
+    // 50+ layout: objects scroll in from left & right, big number in center
+    grid.style.cssText = `
+      display:flex; align-items:center; justify-content:center;
+      width:100%; flex:1; overflow:hidden; padding:4px 0; gap:12px; max-height:280px;
+      position:relative;
+    `;
+
+    const leftCount = Math.floor(n / 2);
+    const rightCount = n - leftCount;
+    const size = 18;
+
+    // Left column stack
+    const leftCol = document.createElement('div');
+    leftCol.style.cssText = `
+      display:flex; flex-wrap:wrap; gap:3px;
+      width:42%; max-height:270px; overflow:hidden;
+      justify-content:flex-end; align-items:center;
+      animation: slideFromLeft 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+    `;
+    for (let i = 0; i < Math.min(leftCount, 40); i++) {
+      const item = document.createElement('div');
+      item.className = 'obj-item';
+      item.style.cssText = `
+        width:${size + 4}px; height:${size + 4}px;
+        animation-delay:${i * 0.015}s;
+        background:rgba(255,255,255,0.05);
+        border:1px solid rgba(255,255,255,0.08);
+        border-radius:7px; padding:1px;
+      `;
+      item.innerHTML = svgStr;
+      leftCol.appendChild(item);
+    }
+    if (leftCount > 40) {
+      const lm = document.createElement('div');
+      lm.style.cssText = `font-size:0.7rem;font-weight:800;color:rgba(255,255,255,0.6);padding:4px;`;
+      lm.textContent = `+${leftCount - 40}`;
+      leftCol.appendChild(lm);
+    }
+
+    // Center number badge
+    const centerBadge = document.createElement('div');
+    centerBadge.style.cssText = `
+      font-family:'Fredoka One',cursive;
+      font-size:clamp(1.4rem,3vw,2.2rem);
+      color:#fff;
+      background:linear-gradient(135deg,${theme.c1},${theme.c2});
+      border-radius:16px;
+      padding:10px 16px;
+      box-shadow:0 0 30px ${theme.glow};
+      white-space:nowrap;
+      flex-shrink:0;
+      animation:numberPop 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+      text-align:center;
+      min-width:60px;
+    `;
+    centerBadge.textContent = n;
+
+    // Right column stack
+    const rightCol = document.createElement('div');
+    rightCol.style.cssText = `
+      display:flex; flex-wrap:wrap; gap:3px;
+      width:42%; max-height:270px; overflow:hidden;
+      justify-content:flex-start; align-items:center;
+      animation: slideFromRight 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+    `;
+    for (let i = 0; i < Math.min(rightCount, 40); i++) {
+      const item = document.createElement('div');
+      item.className = 'obj-item';
+      item.style.cssText = `
+        width:${size + 4}px; height:${size + 4}px;
+        animation-delay:${i * 0.015}s;
+        background:rgba(255,255,255,0.05);
+        border:1px solid rgba(255,255,255,0.08);
+        border-radius:7px; padding:1px;
+      `;
+      item.innerHTML = svgStr;
+      rightCol.appendChild(item);
+    }
+    if (rightCount > 40) {
+      const rm = document.createElement('div');
+      rm.style.cssText = `font-size:0.7rem;font-weight:800;color:rgba(255,255,255,0.6);padding:4px;`;
+      rm.textContent = `+${rightCount - 40}`;
+      rightCol.appendChild(rm);
+    }
+
+    grid.appendChild(leftCol);
+    grid.appendChild(centerBadge);
+    grid.appendChild(rightCol);
+  }
+}
+
+// Add floating keyframe dynamically
+const floatStyle = document.createElement('style');
+floatStyle.textContent = `
+  @keyframes objFloat {
+    from { transform: translateY(0px) rotate(-3deg); }
+    to { transform: translateY(-6px) rotate(3deg); }
+  }
+  @keyframes slideFromLeft {
+    from { transform: translateX(-40px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  @keyframes slideFromRight {
+    from { transform: translateX(40px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+`;
+document.head.appendChild(floatStyle);
+
+// ────────── AUDIO ──────────
+function playAudio(word) {
+  if (!soundOn) return;
+  speechSynth.cancel();
+  const btn = document.getElementById('speakerBtn');
+  const u = new SpeechSynthesisUtterance(word);
+  u.rate = 0.85;
+  u.pitch = 1.1;
+  u.volume = 1;
+  const voice = voices.find(v => v.lang.startsWith('en') && v.name.toLowerCase().includes('female'))
+    || voices.find(v => v.lang === 'en-US')
+    || voices.find(v => v.lang.startsWith('en'));
+  if (voice) u.voice = voice;
+  if (btn) btn.classList.add('playing');
+  u.onend = u.onerror = () => { if (btn) btn.classList.remove('playing'); };
+  speechSynth.speak(u);
+}
+
+function playCurrentAudio() {
+  if (currentNum > 0) playAudio(WORDS[currentNum]);
+}
+
+// ────────── CONTROLS ──────────
+function toggleSound() {
+  soundOn = !soundOn;
+  const btn = document.getElementById('soundBtn');
+  btn.textContent = soundOn ? '🔊 Sound' : '🔇 Muted';
+  if (!soundOn) speechSynth.cancel();
+}
+
+function resetAll() {
+  if (autoPlaying) stopAuto();
+  speechSynth.cancel();
+  currentNum = 0;
+  document.getElementById('defaultState').style.display = '';
+  document.getElementById('learningState').style.display = 'none';
+  document.querySelectorAll('.num-card').forEach(c => {
+    c.classList.remove('active');
+    c.style.removeProperty('--card-active-color');
+    c.style.removeProperty('--card-active-glow');
+  });
+  updateProgress(0);
+  document.getElementById('objectsGrid').innerHTML = '';
+}
+
+function updateProgress(n) {
+  const pct = (n / 100) * 100;
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = `${n} / 100`;
+}
+
+function scrollToCard(n) {
+  const card = document.getElementById(`card-${n}`);
+  if (card) card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// Auto Play
+function toggleAuto() {
+  if (autoPlaying) stopAuto();
+  else startAuto();
+}
+
+function startAuto() {
+  autoPlaying = true;
+  document.getElementById('autoBtn').textContent = '⏹ Stop';
+  document.getElementById('autoBtn').style.background = 'linear-gradient(135deg, #ef4444, #f97316)';
+  document.getElementById('autoIndicator').classList.add('active');
+
+  const startFrom = currentNum >= 100 ? 1 : (currentNum + 1);
+  let cur = startFrom;
+
+  function next() {
+    if (!autoPlaying || cur > 100) { stopAuto(); return; }
+    goTo(cur);
+    cur++;
+    autoTimer = setTimeout(next, 2200);
+  }
+  next();
+}
+
+function stopAuto() {
+  autoPlaying = false;
+  clearTimeout(autoTimer);
+  document.getElementById('autoBtn').textContent = '▶ Auto';
+  document.getElementById('autoBtn').style.background = 'linear-gradient(135deg, #22c55e, #06b6d4)';
+  document.getElementById('autoIndicator').classList.remove('active');
+}
+
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(() => {});
+  } else {
+    document.exitFullscreen();
+  }
+}
+
+// ────────── KEYBOARD ──────────
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goTo(currentNum + 1);
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') goTo(currentNum - 1);
+  if (e.key === ' ') { e.preventDefault(); toggleAuto(); }
+  if (e.key === 'r' || e.key === 'R') resetAll();
+  if (e.key === 'm' || e.key === 'M') toggleSound();
+});
+
+// ────────── START ──────────
+init();
+</script>
+</body>
+</html>
